@@ -1,0 +1,317 @@
+Red wine exploratory data analysis by Siân Nadin
+========================================================
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+
+# Load all of the packages that you end up using in your analysis in this code
+# chunk.
+#install.packages('ggplot2')
+library(ggplot2)
+#install.packages('gridExtra')
+library(gridExtra)
+#install.packages('dplyr')
+#install.packages("tidyr")
+#install.packages('reshape2')
+install.packages("corrplot")
+# The parameter "echo" was set to FALSE for this code chunk. This
+# prevents the code from displaying in the knitted HTML output. You should set
+# echo=FALSE for all code chunks in your file, unless it makes sense for your
+# report to show the code that generated a particular plot.
+
+# The other parameters for "message" and "warning" should also be set to FALSE
+# for other code chunks once you have verified that each plot comes out as you
+# want it to. This will clean up the flow of your report.
+
+
+```
+
+```{r echo=FALSE, Load_the_Data}
+# Load the Data
+red_wine <- read.csv('wineQualityReds.csv')
+head(red_wine)
+```
+## About this dataset
+This dataset is public available for research. The details are described in [Cortez et al., 2009].
+
+P. Cortez, A. Cerdeira, F. Almeida, T. Matos and J. Reis. Modeling wine preferences by data mining from physicochemical properties. In Decision Support Systems, Elsevier, 47(4):547-553. ISSN: 0167-9236.
+
+
+### Description of attributes:
+The dataset consists of 12 variables, with 1599 observations. 
+The attributes are as follows:
+
+   1 - *fixed acidity*: most acids involved with wine or fixed or nonvolatile 
+   (do not evaporate readily)
+
+   2 - *volatile acidity*: the amount of acetic acid in wine, which at too high 
+   of levels can lead to an unpleasant, vinegar taste
+
+   3 - *citric acid*: found in small quantities, citric acid can add 'freshness' 
+   and flavor to wines
+
+   4 - *residual sugar*: the amount of sugar remaining after fermentation stops, 
+   it's rare to find wines with less than 1 gram/liter and wines with greater 
+   than 45 grams/liter are considered sweet
+
+   5 - *chlorides*: the amount of salt in the wine
+
+   6 - *free sulfur dioxide*: the free form of SO2 exists in equilibrium between 
+   molecular SO2 (as a dissolved gas) and bisulfite ion; it prevents microbial 
+   growth and the oxidation of wine
+
+   7 - *total sulfur dioxide*: amount of free and bound forms of S02; in low 
+   concentrations, SO2 is mostly undetectable in wine, but at free SO2 
+   concentrations over 50 ppm, SO2 becomes evident in the nose and taste of wine
+
+   8 - *density*: the density of water is close to that of water depending on 
+   the percent alcohol and sugar content
+
+   9 - *pH*: describes how acidic or basic a wine is on a scale from 0 (very 
+   acidic) to 14 (very basic); most wines are between 3-4 on the pH scale
+
+   10 - *sulphates*: a wine additive which can contribute to sulfur dioxide gas 
+   (S02) levels, wich acts as an antimicrobial and antioxidant
+
+   11 - *alcohol*: the percent alcohol content of the wine
+
+   Output variable (based on sensory data): 
+   12 - *quality* (score between 0 and 10)
+   
+```{r}
+summary(red_wine)
+```
+
+
+
+# Univariate Plots Section
+
+
+First going to take a quick look at the distribution of alcohol percentage in 
+the wine data set with the mean (in blue) and median (in black) plotted on the 
+graph for reference.
+
+```{r echo=FALSE, Univariate_Plots}
+library(ggplot2)
+ggplot(aes(x=quality), data=red_wine) + 
+  geom_histogram(binwidth=1, color='black', fill='orange') +
+    geom_vline(xintercept = median(red_wine$quality), linetype='longdash',
+               alpha=.8) +
+    geom_vline(xintercept = mean(red_wine$quality), linetype='longdash', 
+               color='blue', alpha=.8) 
+```
+
+Most of the wines in the dataset are average quality wines with very few low and
+high quality wines included in this dataset.
+Due to the fact this data is primarily about average quality wines  it might be 
+difficult to build a predictive model that will work acroos varying qualities of
+wine.
+May get a better understanding of the data set by plotting each of the 
+variables to get a better idea of the spread of differences for the properties
+included in this dataset.
+
+```{r}
+p1<-
+  ggplot(aes(x = fixed.acidity), data = red_wine)+
+        xlab("fixed acidity")+
+        geom_histogram(colour="black", fill=I('blue'), binwidth = 0.5)
+p2<-
+  ggplot(aes(x = volatile.acidity), data = red_wine)+
+        xlab("volatile acidity")+
+        geom_histogram(colour="black", fill=I('blue'), binwidth = 0.05)
+p3<-
+  ggplot(aes(x = citric.acid), data = red_wine)+
+        xlab("citric acid")+
+        geom_histogram(colour="black", fill=I('blue'), binwidth = 0.05)
+p4<-
+  ggplot(aes(x = residual.sugar), data = red_wine)+
+        xlab("residual sugar")+
+        geom_histogram(colour="black", fill=I('blue'), binwidth = 0.4)
+p5<-
+  ggplot(aes(x = chlorides), data = red_wine)+
+        geom_histogram(colour="black", fill=I('blue'), binwidth = 0.025)
+p6<-
+  ggplot(aes(x = free.sulfur.dioxide), data = red_wine)+
+        xlab("free sulfur dioxide")+
+        geom_histogram(colour="black", fill=I('blue'), binwidth = 4)
+p7<-
+  ggplot(aes(x = total.sulfur.dioxide), data = red_wine)+
+        xlab("total sulfur dioxide")+
+        geom_histogram(colour="black", fill=I('blue'), binwidth = 20)
+p8<-
+  ggplot(aes(x = density), data = red_wine)+
+        geom_histogram(colour="black", fill=I('blue'), binwidth = 0.001)
+p9<-
+  ggplot(aes(x = pH), data = red_wine)+
+        geom_histogram(colour="black", fill=I('blue'), binwidth = 0.05)
+p10<-
+  ggplot(aes(x = sulphates), data = red_wine)+
+        geom_histogram(colour="black", fill=I('blue'), binwidth = 0.1)
+p11<-
+  ggplot(aes(x = alcohol), data = red_wine)+
+        geom_histogram(colour="black", fill=I('blue'), binwidth = 0.25)
+
+grid.arrange(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,ncol=3)
+
+```
+
+Observation from data:
+Normal distribution:pH, density and fixed acidity. 
+* pH and density both look like they are close to a perfectly normal 
+distribution. Likely that these qualities are well regulated during the 
+production of wine.
+
+Long tail: 
+* The distribution of Residual Sugar is again positively skewed with high peaks 
+at around 2.3 with many outliers present at the higher ranges
+* For Chlorides also, we see a similar distribution like Residual Sugar.
+
+
+Positively skewed:   
+* Fixed Acidity is positively skewed.
+* Free Sulphur Dioxide follows the same positively skewed long tailed patterns 
+with some outliers in the high range.
+* Sulphates also exhibit a similar long tailed distribution and doesn't have a 
+large amount of outliers.
+* Alcohol also follows a skewed distribution but here the skewness is less than 
+that of Chlorides or Residual Sugars.
+
+The distribution of Citric acid looks almost rectangular. Some higher values have no 
+data at all
+
+The distribution of Volatile acidity looks like Bimodal with two peaks around 
+0.4 and 0.6.
+
+*** Create total acidity variable which = fixed+volatile acidity and see if its normal dist
+see how the pH is affected by the different acids present in the wine and if the overall pH affects the quality of the wine
+Maybe plot pH and acidity on top of each other in same plot to see if there's any correlation.
+
+Maybe citric acid leveks vary as different amounts are added to produce different flavours. 
+things like pH must be specifically within a certain range to produce a good wine whereas there's 
+more flexibility with levels of citric acid
+
+Residual sugar and Chloride seems to have extreme outliers.
+
+# Univariate Analysis
+
+> **Tip**: Now that you've completed your univariate explorations, it's time to
+reflect on and summarize what you've found. Use the questions below to help you
+gather your observations and add your own if you have other thoughts!
+
+### What is the structure of your dataset?
+
+### What is/are the main feature(s) of interest in your dataset?
+
+### What other features in the dataset do you think will help support your \
+investigation into your feature(s) of interest?
+
+### Did you create any new variables from existing variables in the dataset?
+
+### Of the features you investigated, were there any unusual distributions? \
+Did you perform any operations on the data to tidy, adjust, or change the form \
+of the data? If so, why did you do this?
+
+
+# Bivariate Plots Section
+```{r}
+library(corrplot)
+corrplot(M, method="circle")
+
+```
+
+> **Tip**: Based on what you saw in the univariate plots, what relationships
+between variables might be interesting to look at in this section? Don't limit
+yourself to relationships between a main output feature and one of the
+supporting variables. Try to look at relationships between supporting variables
+as well.
+
+```{r echo=FALSE, Bivariate_Plots}
+
+```
+
+# Bivariate Analysis
+
+> **Tip**: As before, summarize what you found in your bivariate explorations
+here. Use the questions below to guide your discussion.
+
+### Talk about some of the relationships you observed in this part of the \
+investigation. How did the feature(s) of interest vary with other features in \
+the dataset?
+
+### Did you observe any interesting relationships between the other features \
+(not the main feature(s) of interest)?
+
+### What was the strongest relationship you found?
+
+
+# Multivariate Plots Section
+
+> **Tip**: Now it's time to put everything together. Based on what you found in
+the bivariate plots section, create a few multivariate plots to investigate
+more complex interactions between variables. Make sure that the plots that you
+create here are justified by the plots you explored in the previous section. If
+you plan on creating any mathematical models, this is the section where you
+will do that.
+
+```{r echo=FALSE, Multivariate_Plots}
+
+```
+
+# Multivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the \
+investigation. Were there features that strengthened each other in terms of \
+looking at your feature(s) of interest?
+
+### Were there any interesting or surprising interactions between features?
+
+### OPTIONAL: Did you create any models with your dataset? Discuss the \
+strengths and limitations of your model.
+
+------
+
+# Final Plots and Summary
+
+> **Tip**: You've done a lot of exploration and have built up an understanding
+of the structure of and relationships between the variables in your dataset.
+Here, you will select three plots from all of your previous exploration to
+present here as a summary of some of your most interesting findings. Make sure
+that you have refined your selected plots for good titling, axis labels (with
+units), and good aesthetic choices (e.g. color, transparency). After each plot,
+make sure you justify why you chose each plot by describing what it shows.
+
+### Plot One
+```{r echo=FALSE, Plot_One}
+
+```
+
+### Description One
+
+
+### Plot Two
+```{r echo=FALSE, Plot_Two}
+
+```
+
+### Description Two
+
+
+### Plot Three
+```{r echo=FALSE, Plot_Three}
+
+```
+
+### Description Three
+
+------
+
+# Reflection
+
+> **Tip**: Here's the final step! Reflect on the exploration you performed and
+the insights you found. What were some of the struggles that you went through?
+What went well? What was surprising? Make sure you include an insight into
+future work that could be done with the dataset.
+
+> **Tip**: Don't forget to remove this, and the other **Tip** sections before
+saving your final work and knitting the final report!
