@@ -8,9 +8,10 @@ Red wine exploratory data analysis by Siân Nadin
 #install.packages('ggplot2')
 #install.packages('gridExtra')
 #install.packages("corrplot")
-#install.packages('memisc') #summarise the regression
+#install.packages('memisc') 
 #install.packages('lattice') 
 #install.packages('MASS')
+#install.packages("Simpsons")
 
 # The other parameters for "message" and "warning" should also be set to FALSE
 # for other code chunks once you have verified that each plot comes out as you
@@ -82,6 +83,29 @@ summary(red_wine)
 ```
 
 ***
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# I will write some functions for plots that are used frequantly
+
+#histograms
+plot.hist <- function(x.var, df, bw, fill.col){
+  ggplot(df, aes_string(x = x.var)) +
+    geom_histogram(binwidth = bw, colour="black", fill=I(fill.col)) 
+}
+
+#bar charts
+plot.bar <- function(x.var, df){
+  ggplot(df, aes_string(x = x.var)) +
+    geom_bar()
+}
+
+#box plots
+plot.box <- function(x.var, y.var, df){
+  ggplot(df, aes_string(x = x.var, y=y.var)) +
+    geom_boxplot() 
+}
+
+```
+
 
 # Univariate Plots Section
 
@@ -91,8 +115,7 @@ reference.
 
 ```{r echo=FALSE, Univariate_Plots}
 library(ggplot2)
-ggplot(aes(x=quality), data=red_wine) + 
-  geom_histogram(binwidth=1, color='black', fill='orange') +
+plot.bar('quality', red_wine) + xlab('Quality') +
     geom_vline(xintercept = median(red_wine$quality), linetype='longdash',
                alpha=.8) +
     geom_vline(xintercept = mean(red_wine$quality), linetype='longdash', 
@@ -110,45 +133,43 @@ included in this dataset.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 library(gridExtra)
+
 p1<-
-  ggplot(aes(x = fixed.acidity), data = red_wine)+
-        xlab("fixed acidity")+
-        geom_histogram(colour="black", fill=I('blue'), binwidth = 0.5)
+  plot.hist('fixed.acidity', red_wine, 0.5, 'blue') + xlab('Fixed acidity')
+
 p2<-
-  ggplot(aes(x = volatile.acidity), data = red_wine)+
-        xlab("volatile acidity")+
-        geom_histogram(colour="black", fill=I('blue'), binwidth = 0.05)
+  plot.hist('volatile.acidity', red_wine, 0.05, 'blue') + 
+  xlab('Volatile acidity')
+
 p3<-
-  ggplot(aes(x = citric.acid), data = red_wine)+
-        xlab("citric acid")+
-        geom_histogram(colour="black", fill=I('blue'), binwidth = 0.05)
+  plot.hist('citric.acid', red_wine, 0.05, 'blue') + xlab('Citric acid')
+
 p4<-
-  ggplot(aes(x = residual.sugar), data = red_wine)+
-        xlab("residual sugar")+
-        geom_histogram(colour="black", fill=I('blue'), binwidth = 0.4)
+  plot.hist('residual.sugar', red_wine, 0.4, 'blue') + xlab('Residual sugar')
+
 p5<-
-  ggplot(aes(x = chlorides), data = red_wine)+
-        geom_histogram(colour="black", fill=I('blue'), binwidth = 0.025)
+  plot.hist('chlorides', red_wine, 0.025, 'blue') + xlab('Chlorides')
+
 p6<-
-  ggplot(aes(x = free.sulfur.dioxide), data = red_wine)+
-        xlab("free sulfur dioxide")+
-        geom_histogram(colour="black", fill=I('blue'), binwidth = 4)
+  plot.hist('free.sulfur.dioxide', red_wine, 4, 'blue') + 
+  xlab('Free sulfur dioxide')
+
 p7<-
-  ggplot(aes(x = total.sulfur.dioxide), data = red_wine)+
-        xlab("total sulfur dioxide")+
-        geom_histogram(colour="black", fill=I('blue'), binwidth = 20)
+  plot.hist('total.sulfur.dioxide', red_wine, 20, 'blue') + 
+  xlab('Free sulfur dioxide')
+
 p8<-
-  ggplot(aes(x = density), data = red_wine)+
-        geom_histogram(colour="black", fill=I('blue'), binwidth = 0.001)
+  plot.hist('density', red_wine, 0.001, 'blue') + xlab('Density')
+
 p9<-
-  ggplot(aes(x = pH), data = red_wine)+
-        geom_histogram(colour="black", fill=I('blue'), binwidth = 0.05)
+  plot.hist('pH', red_wine, 0.05, 'blue') + xlab('pH')
+
 p10<-
-  ggplot(aes(x = sulphates), data = red_wine)+
-        geom_histogram(colour="black", fill=I('blue'), binwidth = 0.1)
+  plot.hist('sulphates', red_wine, 0.1, 'blue') + xlab('Sulphates')
+
 p11<-
-  ggplot(aes(x = alcohol), data = red_wine)+
-        geom_histogram(colour="black", fill=I('blue'), binwidth = 0.25)
+  plot.hist('alcohol', red_wine, 0.25, 'blue') + xlab('Alcohol')
+
 
 grid.arrange(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,ncol=3)
 
@@ -168,7 +189,9 @@ it has a normal disstribution.
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 red_wine$total_acidity <- red_wine$volatile.acidity + red_wine$fixed.acidity +
   red_wine$citric.acid
-ggplot(aes(x=total_acidity), data=red_wine) + geom_histogram()
+
+plot.hist('total_acidity', red_wine, 0.25, 'blue') + xlab('Total acidity')
+
 ```
 
 This plot isn't quite the same shape as the pH curve so the volatile acidity, 
@@ -271,7 +294,6 @@ reversal. This is due to ommited variable bias which changes the overall
 coefficient.
 
 ```{r echo=FALSE, results='hide', message=FALSE, warning=FALSE}
-#install.packages("Simpsons")
 library(Simpsons)
 simpsons <- Simpsons(volatile.acidity, pH, data=red_wine)
 plot(simpsons)
@@ -298,7 +320,7 @@ scores graphically using  box plots:
 red_wine$quality_groups <- factor(red_wine$quality, 
                                   levels=c(3,4,5,6,7,8))
 
-ggplot(aes(x=quality_groups, y=alcohol), data=red_wine) + geom_boxplot()
+plot.box('quality_groups', 'alcohol', red_wine)
 
 ```
 
@@ -327,7 +349,8 @@ with a given quality rating have a certain percentage of alcohol.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(red_wine, aes(x=alcohol, fill=quality_groups)) +
-      geom_histogram(binwidth=.5, alpha=.5, position="identity")
+      geom_histogram(binwidth=.5, alpha=.5, position="identity") +
+  scale_fill_brewer(type='seq')
 ```
 
 As stated earlier the amount of data collected for each of the quality ratings 
@@ -345,7 +368,6 @@ In order to make the data we are looking at easier to comprehend we can group
 the qualities into three categories: Low(3-4), Medium(5-6) and High(7-8).
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-
 red_wine$grade<-cut(red_wine$quality, c(2.5,4.5,6.5,8.5),
                    labels=c('Low','Medium','High'))
 
@@ -366,7 +388,7 @@ tapply(red_wine$sulphates, red_wine$quality, mean)
 A visual reprsentaion of this:
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-ggplot(aes(x=quality_groups, y=sulphates), data=red_wine) + geom_boxplot()
+plot.box('quality_groups', 'sulphates', red_wine)
 ```
 
 The trend in this plot shows that better wines tend to have more sulphates. The 
@@ -410,8 +432,7 @@ tapply(red_wine$volatile.acidity, red_wine$quality, mean)
 A visual reprsentation of the mean across the different quality ratings:
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-ggplot(data=red_wine, aes(x=quality_groups, y=volatile.acidity)) +
-    geom_boxplot()  
+plot.box('quality_groups', 'volatile.acidity', red_wine) 
 ```
 
 Given the correlation, it was not too surprising to see the trend here.
@@ -470,9 +491,8 @@ Since volatile acidity and alcohol both play a large part in determining a wines
 quality we can plot these three factors together:
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-ggplot(aes(x=alcohol, y=volatile.acidity, color = grade), 
-       data=red_wine) +
-      geom_jitter(size = 2, alpha = 0.4) 
+ggplot(aes(x=alcohol, y=volatile.acidity, color = grade), data=red_wine) +
+      geom_jitter(size = 2, alpha = 0.3) 
 ```
 
 The plot shows that the lower to average quality wines are more clustered 
@@ -501,9 +521,14 @@ Let's compare all three of these important variables and see how they perform
 when seperated out into quality grades.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-ggplot(aes(x=alcohol, y=volatile.acidity, color = log10(sulphates)), 
-       data=red_wine) +
-      geom_jitter(size = 2, alpha = 0.3) +
+alcohol_label <- "Alcohol (% volume)" 
+sulphates_label <- expression("Sulphate concentration" ~ (g/dm^{3}))
+
+ggplot(data = red_wine, aes(y = sulphates, x = alcohol, color=grade, 
+                            size=volatile.acidity)) +
+  geom_jitter(alpha=0.4) +
+  xlab(alcohol_label) +
+  ylab(sulphates_label) +
   facet_grid(grade ~ .)
 ```
 
@@ -555,7 +580,7 @@ have a high confidence level for predicting quality.
 ### Plot One
 ```{r echo=FALSE, Plot_One}
 ggplot(aes(x=quality), data=red_wine) + 
-  geom_histogram(binwidth=1, color='black', fill='orange') +
+  geom_bar() +
     geom_vline(xintercept = median(red_wine$quality), linetype='longdash',
                alpha=.8) +
     geom_vline(xintercept = mean(red_wine$quality), linetype='longdash', 
@@ -576,30 +601,22 @@ wine using this data alone.
 
 ### Plot Two
 ```{r echo=FALSE, Plot_Two}
-acetic_acid_label <- expression("Acetic acid concentration" ~ (g/dm^{3}))
-sulphates_label <- expression("Sulphate concentration" ~ (g/dm^{3}))
-alcohol_label <- "Alcohol (% volume)"
+library(gridExtra)
+volatile_acidity_label <- expression("Volatile acidity concentration" ~ (g/dm^{3}))
 
-p1 <- ggplot(aes(x = quality, y = volatile.acidity, color = grade), 
-             data = red_wine) +
-  geom_boxplot() +
-  guides(fill = FALSE) +
+p1 <- plot.box('quality_groups', 'volatile.acidity', red_wine) +
   ggtitle('Volatile acidity vs. quality') +
   xlab('Quality') + 
-  ylab(acetic_acid_label)
+  ylab(volatile_acidity_label)
 
-p2 <- ggplot(aes(x = quality, y = sulphates, color = grade), 
-             data = red_wine) +
-  geom_boxplot() +
-  guides(fill = FALSE) +
+p2 <- 
+  plot.box('quality_groups', 'sulphates', red_wine) +
   ggtitle('Sulphate vs. quality') +
   xlab('Quality') + 
   ylab(sulphates_label)
 
-p3 <- ggplot(aes(x = quality, y = alcohol, color = grade), 
-             data = red_wine) +
-  geom_boxplot() +
-  guides(fill = FALSE) +
+p3 <- 
+  plot.box('quality_groups', 'alcohol', red_wine) +
   ggtitle('Alcohol vs. quality') +
   xlab('Quality') + 
   ylab(alcohol_label)
