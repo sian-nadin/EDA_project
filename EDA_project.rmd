@@ -470,7 +470,7 @@ Since volatile acidity and alcohol both play a large part in determining a wines
 quality we can plot these three factors together:
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-ggplot(aes(x=alcohol, y=volatile.acidity, color = quality_groups), 
+ggplot(aes(x=alcohol, y=volatile.acidity, color = grade), 
        data=red_wine) +
       geom_jitter(size = 2, alpha = 0.4) 
 ```
@@ -489,7 +489,7 @@ Higher quality wine have more alcohol and lower volatile acidity.
 Similarly, we can compare how alcohol and sulphates vary across quality.
  
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-ggplot(aes(x=alcohol, y=sulphates, color = quality_groups), data=red_wine) +
+ggplot(aes(x=alcohol, y=sulphates, color = grade), data=red_wine) +
       geom_jitter(size = 2, alpha = 0.3) 
 ```
 
@@ -536,10 +536,11 @@ library(memisc)
 # Multivariate Analysis
 
 ### Talk about some of the relationships you observed in this part of the \
-investigation. Were there features that strengthened each other in terms of \
-looking at your feature(s) of interest?
+investigation. 
+The multivariate analysis revealed that high quality wines tend to have a higher 
+quantities of alcohol and sulphates but a lower volatile acidity. 
 
-### Were there any interesting or surprising interactions between features?
+
 
 ### OPTIONAL: Did you create any models with your dataset? Discuss the \
 strengths and limitations of your model.
@@ -551,50 +552,120 @@ have a high confidence level for predicting quality.
 
 # Final Plots and Summary
 
-> **Tip**:  After each plot,
-make sure you justify why you chose each plot by describing what it shows. Draw comparisons.
-Identify trends.
-Engage a wide audience.
-Explain a complicated finding.
-Clarify a gap between perception and reality.
-Enable the reader to digest large amounts of information
-
 ### Plot One
 ```{r echo=FALSE, Plot_One}
-
+ggplot(aes(x=quality), data=red_wine) + 
+  geom_histogram(binwidth=1, color='black', fill='orange') +
+    geom_vline(xintercept = median(red_wine$quality), linetype='longdash',
+               alpha=.8) +
+    geom_vline(xintercept = mean(red_wine$quality), linetype='longdash', 
+               color='blue', alpha=.8) +
+    ggtitle('Wine quality') +
+    xlab('Quality') + 
+    ylab('Number of wines')
 ```
 
 ### Description One
-
+It is important to note the distribution of wine qualities obtained in this 
+dataset. The majority of wines have a quality between of 5 or 6 
+A very big majority of wines (roughly 82%) have a quality five or six. There are
+very few low and high quality wines and absolutel none with a quality of 1,2,8 
+or 9. Due to the limited amount of data we have on wines that are not of an 
+average quality it will be diffivult to determine what produces a high quality
+wine using this data alone.
 
 ### Plot Two
 ```{r echo=FALSE, Plot_Two}
+acetic_acid_label <- expression("Acetic acid concentration" ~ (g/dm^{3}))
+sulphates_label <- expression("Sulphate concentration" ~ (g/dm^{3}))
+alcohol_label <- "Alcohol (% volume)"
 
+p1 <- ggplot(aes(x = quality, y = volatile.acidity, color = grade), 
+             data = red_wine) +
+  geom_boxplot() +
+  guides(fill = FALSE) +
+  ggtitle('Volatile acidity vs. quality') +
+  xlab('Quality') + 
+  ylab(acetic_acid_label)
+
+p2 <- ggplot(aes(x = quality, y = sulphates, color = grade), 
+             data = red_wine) +
+  geom_boxplot() +
+  guides(fill = FALSE) +
+  ggtitle('Sulphate vs. quality') +
+  xlab('Quality') + 
+  ylab(sulphates_label)
+
+p3 <- ggplot(aes(x = quality, y = alcohol, color = grade), 
+             data = red_wine) +
+  geom_boxplot() +
+  guides(fill = FALSE) +
+  ggtitle('Alcohol vs. quality') +
+  xlab('Quality') + 
+  ylab(alcohol_label)
+
+grid.arrange(p1, p2, p3, ncol=2)
 ```
 
 ### Description Two
-Alcohol conc vs. quality
-had the highest positive correlation with the wine quality
-suggested to me that alcohol amount is an important feature to consider in building up the model at later stage
+Three factors that were highly correlated with quality were alcohol, phosphate 
+levels and volatile acid. The high quality wines were shown to contain a low
+amount of volatile acidity and higher amounts of alcohol and sulphates. The 
+lower quality wines displayed high amount of volatile acidity and low amounts of 
+alcohol and sulphates. Therefore thses attributes can be used to make a 
+reasonable prediction of how a wines quality will be scored. 
+
 
 ### Plot Three
 ```{r echo=FALSE, Plot_Three}
-
+ggplot(data = red_wine, aes(y = sulphates, x = alcohol, color=grade, 
+                            size=volatile.acidity)) +
+  geom_jitter(alpha=0.4) +
+  ggtitle('The three most highly correlated features in wine quality') +
+  xlab(alcohol_label) +
+  ylab(sulphates_label) +
+  facet_grid(grade ~ .) +
+  scale_size_continuous(name=expression("volatile acidity" ~ (g/dm^{3})))
 ```
 
 ### Description Three
-Alcohol vs. volatile aidity coloured by quality
-Volatile acidity came as second potential attribute as poor wines had larger median amounts of volatile acidity and it had second strongest correlation with quality
+The plots show that low quality wines tend to have a higher volatile acidity and
+lower sulphate and alcohol levels, while high quality wines display the 
+opposite. The average quality wines suffer from quite a lot of overplotting 
+which is due to the bulk of the data representing average quality wines. It is 
+interesting to note that there is plenty of overlap for these three features for 
+all of the different wine qualities. Since there is no distinctive barrier
+between the differing qualities other fcators must be taken into consideration
+when assesing a wines quality.
+One distinctive pattern that can be seen is that the majority of the high 
+quality wines have much lower levels of volatile acidity than the low quality 
+wines. Despite the fact that high quality wines can still be found to have a 
+lower alcohol percentage, which is commonly found in lower quality wines, it 
+seems unlikely that you will find a high quality wine that will have a high 
+volatile acidity. The maximum amount of volatile acidity found in high quality 
+wines is 0.915g/dm^3 whereas in low quality wines it can be as high as 
+1.58g/dm^3. However, these values are outliers as the mean volatil acidity for 
+low and high quality wine is 0.72 and 0.4 respectively.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+tapply(red_wine$volatile.acidity, red_wine$grade, max)
+tapply(red_wine$volatile.acidity, red_wine$grade, mean)
+```
+
 ------
 
 # Reflection
-There are many other factors that are related with good wines. Many of them are related with smells and flavours and not with chemical properties
-I think, if I had more attributes available, for instance, wine price, brand ratings, maunfactoring information etc, I would have been able to construct a better classifier.
-the data set must have more representative wines of poor and excellent qualities, and with this constraint accompanying several other attribues,I would like to improve the classifying task further. 
-> **Tip**: Here's the final step! Reflect on the exploration you performed and
-the insights you found. What were some of the struggles that you went through?
-What went well? What was surprising? Make sure you include an insight into
-future work that could be done with the dataset. Where did I run into difficulties in the analysis?
-Where did I find successes?
-How could the analysis be enriched in future work (e.g. additional data and analyses)?
+This analysis showed that although factors such as alcohol content, volatile 
+acidity and sulphate levels can be good indicators of whether or not a wine will
+be considered a good quaity, there are other important factors at play. Some of
+the other factors that may go into determining quality may be things such as
+smells and flavours rather than just chemical properties. In addition to this
+many other things that aren't necessarily related to the wine composition could
+affect how popular it is. Attributes such as price, branding, availability and
+manufacturing process can all greatly affect how popular a wine will be.
+In conclusion, a much more reliable study of wine quality could be conducted if
+the data set included more data on wines that fall on both the lower and higher 
+end of quality as well as including several other additional attributes that 
+would improve a prediction on wine quality a lot more. 
+
+
 
