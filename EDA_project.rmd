@@ -98,11 +98,28 @@ plot.bar <- function(x.var, df){
     geom_bar()
 }
 
-#box plots
-plot.box <- function(x.var, y.var, df){
+#box plots with scatter points
+ plot.box_and_scatter <- function(x.var, y.var, df){
   ggplot(df, aes_string(x = x.var, y=y.var)) +
-    geom_boxplot() 
-}
+     geom_jitter(alpha=.3) +
+     geom_boxplot( alpha = .5,color = 'blue')+
+     stat_summary(fun.y = "mean", 
+               geom = "point", 
+               color = "red", 
+               shape = 8, 
+               size = 4)
+ }
+ 
+# box plots
+  plot.box <- function(x.var, y.var, df){
+  ggplot(df, aes_string(x = x.var, y=y.var)) +
+  geom_boxplot()+    
+  stat_summary(fun.y = "mean", 
+             geom = "point", 
+             color = "red", 
+             shape = 8, 
+             size = 4)
+  }
 
 ```
 
@@ -122,6 +139,11 @@ plot.bar('quality', red_wine) + xlab('Quality') +
                color='blue', alpha=.8) 
 ```
 
+```{r}
+summary (red_wine$quality)
+```
+
+
 Most of the wines in the dataset are average quality wines with very few low and
 high quality wines included in this dataset.
 Due to the fact this data is primarily about average quality wines it might be 
@@ -135,7 +157,7 @@ included in this dataset.
 library(gridExtra)
 
 p1<-
-  plot.hist('fixed.acidity', red_wine, 0.5, 'blue') + xlab('Fixed acidity')
+  plot.hist('fixed.acidity', red_wine, 0.5, 'blue') + xlab('Fixed acidity') 
 
 p2<-
   plot.hist('volatile.acidity', red_wine, 0.05, 'blue') + 
@@ -185,12 +207,15 @@ acidity looks to be slightly bimodal. Since these two acidity values will have
 a large impact on the pH values I wonder if the sum of these two values would
 look closer to a normal distribution? 
 We can create total acidity variable which = fixed + volatile acidity and see if 
-it has a normal disstribution.
+it has a normal distribution.
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 red_wine$total_acidity <- red_wine$volatile.acidity + red_wine$fixed.acidity +
   red_wine$citric.acid
 
 plot.hist('total_acidity', red_wine, 0.25, 'blue') + xlab('Total acidity')
+
+summary (red_wine$total_acidity)
 
 ```
 
@@ -317,11 +342,17 @@ tapply(red_wine$alcohol, red_wine$quality, mean)
 We can view the spread of percentage alcohol accross the different quality 
 scores graphically using  box plots:
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(ggplot2)
 red_wine$quality_groups <- factor(red_wine$quality, 
                                   levels=c(3,4,5,6,7,8))
 
-plot.box('quality_groups', 'alcohol', red_wine)
+plot.box_and_scatter('quality_groups', 'alcohol', red_wine)
 
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary (red_wine$quality)
+cor (red_wine$alcohol, red_wine$quality)
 ```
 
 The plot shows that the higher the wine quality, the higher the mean alcohol 
@@ -388,9 +419,14 @@ tapply(red_wine$sulphates, red_wine$quality, mean)
 A visual reprsentaion of this:
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-plot.box('quality_groups', 'sulphates', red_wine)
+plot.box_and_scatter('quality_groups', 'sulphates', red_wine) +
+  coord_cartesian(ylim = c(0.25, 1.5))
 ```
 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary (red_wine$sulphates)
+cor (red_wine$sulphates, red_wine$quality)
+```
 The trend in this plot shows that better wines tend to have more sulphates. The 
 IQR is quite small across all the of the varying qualities, which would suggest
 that there is a narrow range of acceptance for sulphate levels in wines.
@@ -417,10 +453,11 @@ ggplot(red_wine, aes(x=log10(sulphates), fill=grade)) +
 
 
 ### Quality vs. Volatile acidity
-Now let's look at a negative correlation for quality: volatile acidity. 
+Now let's look at a negative correlation for quality: volatile acidity.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 summary(red_wine$volatile.acidity)
+cor (red_wine$volatile.acidity, red_wine$quality)
 ```
 
 Again, we can see what the mean value is across the different quality ranges:
@@ -432,7 +469,7 @@ tapply(red_wine$volatile.acidity, red_wine$quality, mean)
 A visual reprsentation of the mean across the different quality ratings:
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-plot.box('quality_groups', 'volatile.acidity', red_wine) 
+plot.box_and_scatter('quality_groups', 'volatile.acidity', red_wine) 
 ```
 
 Given the correlation, it was not too surprising to see the trend here.
@@ -492,7 +529,9 @@ quality we can plot these three factors together:
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(aes(x=alcohol, y=volatile.acidity, color = grade), data=red_wine) +
-      geom_jitter(size = 2, alpha = 0.3) 
+      geom_point(alpha = 0.8, size = 1) +
+      geom_smooth(method = "lm", se = FALSE,size=1)  +
+      scale_color_brewer(type='seq', guide=guide_legend(title='Quality'))
 ```
 
 The plot shows that the lower to average quality wines are more clustered 
@@ -510,7 +549,9 @@ Similarly, we can compare how alcohol and sulphates vary across quality.
  
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(aes(x=alcohol, y=sulphates, color = grade), data=red_wine) +
-      geom_jitter(size = 2, alpha = 0.3) 
+      geom_point(alpha = 0.8, size = 1) +
+      geom_smooth(method = "lm", se = FALSE,size=1)  +
+      scale_color_brewer(type='seq', guide=guide_legend(title='Quality')) 
 ```
 
 The graph suggests that wines with higher alcohol content will be considered a 
@@ -602,7 +643,8 @@ wine using this data alone.
 ### Plot Two
 ```{r echo=FALSE, Plot_Two}
 library(gridExtra)
-volatile_acidity_label <- expression("Volatile acidity concentration" ~ (g/dm^{3}))
+volatile_acidity_label <- expression("Volatile acidity concentration" ~ 
+                                       (g/dm^{3}))
 
 p1 <- plot.box('quality_groups', 'volatile.acidity', red_wine) +
   ggtitle('Volatile acidity vs. quality') +
@@ -612,6 +654,7 @@ p1 <- plot.box('quality_groups', 'volatile.acidity', red_wine) +
 p2 <- 
   plot.box('quality_groups', 'sulphates', red_wine) +
   ggtitle('Sulphate vs. quality') +
+  coord_cartesian(ylim = c(0.25, 1.5)) +
   xlab('Quality') + 
   ylab(sulphates_label)
 
@@ -635,8 +678,8 @@ reasonable prediction of how a wines quality will be scored.
 
 ### Plot Three
 ```{r echo=FALSE, Plot_Three}
-ggplot(data = red_wine, aes(y = sulphates, x = alcohol, color=grade, 
-                            size=volatile.acidity)) +
+ggplot(data = red_wine, aes(y = sulphates, x = alcohol, colour=quality_groups, 
+                      size=volatile.acidity)) +
   geom_jitter(alpha=0.4) +
   ggtitle('The three most highly correlated features in wine quality') +
   xlab(alcohol_label) +
