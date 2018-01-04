@@ -3,8 +3,8 @@ Red wine exploratory data analysis by Siân Nadin
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
 
-# Load all of the packages that you end up using in your analysis in this code
-# chunk.
+# Load all of the packages needed
+
 #install.packages('ggplot2')
 #install.packages('gridExtra')
 #install.packages("corrplot")
@@ -13,9 +13,6 @@ Red wine exploratory data analysis by Siân Nadin
 #install.packages('MASS')
 #install.packages("Simpsons")
 
-# The other parameters for "message" and "warning" should also be set to FALSE
-# for other code chunks once you have verified that each plot comes out as you
-# want it to. This will clean up the flow of your report.
 ```
 
 
@@ -76,7 +73,8 @@ The attributes are as follows:
    Output variable (based on sensory data): 
    12 - *quality* (score between 0 and 10)
 
-We can take a look at the summary of these variables in order to get an initial overview of what the values are like:
+We can take a look at the summary of these variables in order to get an initial 
+overview of what the values are like:
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 summary(red_wine)
@@ -84,7 +82,7 @@ summary(red_wine)
 
 ***
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-# I will write some functions for plots that are used frequantly
+# Functions for plots that are used frequently
 
 #histograms
 plot.hist <- function(x.var, df, bw, fill.col){
@@ -257,8 +255,7 @@ I'm interseted in what factors impact the quality of wine. The quality is
 scored between 0-10, but we only have observations with values between 3 and 8. 
 The majority of the wines listed have an average quality of roughly 5.
 
-### What other features in the dataset do you think will help support your \
-investigation into your feature(s) of interest?
+### What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
 I expect citric acid, pH, residual sugar, and volatile acidity will largely 
 contribute to the quality of a wine as these factors will likely have the
 greatest impact on taste.
@@ -269,9 +266,7 @@ I was curious to see if the pH was close to a sum of these three parameters but
 the plot showed that total acidity was slightly different to pH so there are 
 other factors affecting pH.
 
-### Of the features you investigated, were there any unusual distributions? \
-Did you perform any operations on the data to tidy, adjust, or change the form \
-of the data? If so, why did you do this?
+### Of the features you investigated, were there any unusual distributions? 
 The plot of citric acid seemed a bit strange but the wide amount of variance is
 likely due to there not being strict constarints on how much or how little
 citric acid is used in flavouring a wine.
@@ -410,7 +405,7 @@ ggplot(red_wine, aes(x=alcohol, fill=grade)) +
 
 
 ### Quality vs. sulphates
-Let's see how sulphate levels vary acrooss qualities 
+Let's see how sulphate levels vary across qualities 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 tapply(red_wine$sulphates, red_wine$quality, mean)
@@ -450,7 +445,7 @@ ggplot(red_wine, aes(x=log10(sulphates), fill=grade)) +
                    binwidth=.5, alpha=.4, position="identity")
 ```
 
-
+***
 
 ### Quality vs. Volatile acidity
 Now let's look at a negative correlation for quality: volatile acidity.
@@ -499,17 +494,14 @@ ggplot(red_wine, aes(x=volatile.acidity, fill=grade)) +
 # Bivariate Analysis
 
 
-### Talk about some of the relationships you observed in this part of the \
-investigation. How did the feature(s) of interest vary with other features in \
-the dataset?
-
+### Talk about some of the relationships you observed in this part of the investigation.
+ 
 Based on the results of the correlogram I expect that volatile acidity, citric 
 acid and alcohol could be used to predict what the quality of a wine will be.  
 The higher quality wines have means and medians for these variables that are 
 distinctively seperate from the lower quality wines. 
 
-### Did you observe any interesting relationships between the other features \
-(not the main feature(s) of interest)?
+### Did you observe any interesting relationships between the other features?
 
 I was surprised to see that pH and volatile acidity are positively correleated, 
 since a higher pH value would result from an increase in acidity. However, this
@@ -601,20 +593,17 @@ library(memisc)
 
 # Multivariate Analysis
 
-### Talk about some of the relationships you observed in this part of the \
-investigation. 
+### Talk about some of the relationships you observed in this part of the investigation. 
 The multivariate analysis revealed that high quality wines tend to have a higher 
 quantities of alcohol and sulphates but a lower volatile acidity. 
 
-
-
-### OPTIONAL: Did you create any models with your dataset? Discuss the \
-strengths and limitations of your model.
+### Did you create any models with your dataset? Discuss the strengths and limitations of your model.
 
 Yes, I created a linear model. However, due to the fact that there is not a lot 
 of data on the poor and high quality wines in this dataset the equation will not
 have a high confidence level for predicting quality. 
-------
+
+***
 
 # Final Plots and Summary
 
@@ -668,11 +657,11 @@ grid.arrange(p1, p2, p3, ncol=2)
 ```
 
 ### Description Two
-Three factors that were highly correlated with quality were alcohol, phosphate 
+Three factors that were highly correlated with quality were alcohol, sulphate 
 levels and volatile acid. The high quality wines were shown to contain a low
 amount of volatile acidity and higher amounts of alcohol and sulphates. The 
 lower quality wines displayed high amount of volatile acidity and low amounts of 
-alcohol and sulphates. Therefore thses attributes can be used to make a 
+alcohol and sulphates. Therefore theese attributes can be used to make a 
 reasonable prediction of how a wines quality will be scored. 
 
 
