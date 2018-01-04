@@ -9,12 +9,12 @@ P. Cortez, A. Cerdeira, F. Almeida, T. Matos and J. Reis. Modeling wine
 preferences by data mining from physicochemical properties. In Decision Support
 Systems, Elsevier, 47(4):547-553. ISSN: 0167-9236.
 
-![alt text](screenshots/datasetOverview.png "Quality distribution of red wine")
+
 ### Brief overview of the data set
 The majority of wines (roughly 82%) have a quality between of 5 or 6. There are very few low and high quality wines and absolutely none
 with a quality of 1,2,8 or 9. Due to the limited amount of data we have on wines that are not of an average quality it will be difficult
 to determine what produces a high quality wine using this data alone.
-
+![alt text](screenshots/datasetOverview.png "Quality distribution of red wine")
 
 
 ### Largest contributing factors to wine quality
@@ -22,7 +22,7 @@ Three factors that were highly correlated with quality were alcohol, sulphate le
 to contain a low amount of volatile acidity and higher amounts of alcohol and sulphates. The lower quality wines displayed high amount
 of volatile acidity and low amounts of alcohol and sulphates. Therefore theese attributes can be used to make a reasonable prediction of
 how a wines quality will be scored.
-
+![alt text](screenshots/contributingFactorsBoxplots.png "Factor vs. quality boxplots")
 
 ### The three most highlt corrleated features of wine
 The plots show that low quality wines tend to have a higher volatile acidity and lower sulphate and alcohol levels, while high quality
@@ -35,3 +35,4 @@ low quality wines. Despite the fact that high quality wines can still be found t
 in lower quality wines, it seems unlikely that you will find a high quality wine that will have a high volatile acidity. The maximum amount
 of volatile acidity found in high quality wines is 0.915g/dm^3 whereas in low quality wines it can be as high as 1.58g/dm^3. However, these
 values are outliers as the mean volatil acidity for low and high quality wine is 0.72 and 0.4 respectively.
+![alt text](screenshots/highestCorrelated.png "Three most highly dorrelated features of red wine")
